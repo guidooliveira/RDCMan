@@ -1,30 +1,30 @@
 ﻿function New-RDCManFile
 {
-<#
-	.SYNOPSIS
-		Creates a new Remote Desktop Connection Manager File.
+  <#
+      .SYNOPSIS
+      Creates a new Remote Desktop Connection Manager File.
 
-	.DESCRIPTION
-		Creates a new Remote Desktop Connection Manager File for version 2.7
- which can then be modified.
-	.PARAMETER  FilePath
-		Input the path for the file you wish to Create.
+      .DESCRIPTION
+      Creates a new Remote Desktop Connection Manager File for version 2.7
+      which can then be modified.
+      .PARAMETER  FilePath
+      Input the path for the file you wish to Create.
 
-	.PARAMETER  Name
-		Input the name for the Structure within the file.
+      .PARAMETER  Name
+      Input the name for the Structure within the file.
 
-	.EXAMPLE
-		PS C:\> New-RDCManFile -FilePath .\Test.rdg -Name RDCMan
-		'If no output is generated the command was run successfully'
-		This example shows how to call the Name function with named parameters.
+      .EXAMPLE
+      PS C:\> New-RDCManFile -FilePath .\Test.rdg -Name RDCMan
+      'If no output is generated the command was run successfully'
+      This example shows how to call the Name function with named parameters.
 
 
-	.INPUTS
-		System.String
+      .INPUTS
+      System.String
 
-	.OUTPUTS
-		Null
-#>
+      .OUTPUTS
+      Null
+  #>
   Param(
     [Parameter(Mandatory = $true)]
     [String]$FilePath,
@@ -67,10 +67,10 @@
     
     $xml.RDCMan.file.properties |
     Where-Object -FilterScript {
-      $_.Name -eq '' 
+      $_.Name -eq ''
     } |
     ForEach-Object -Process {
-      [void]$xml.RDCMan.file.ReplaceChild($File,$_) 
+      [void]$xml.RDCMan.file.ReplaceChild($File,$_)
     }
   }
   END
@@ -80,31 +80,31 @@
 }
 function New-RDCManGroup
 {
-<#
-	.SYNOPSIS
-		Creates a new Group within your Remote Desktop Connection Manager File.
+  <#
+      .SYNOPSIS
+      Creates a new Group within your Remote Desktop Connection Manager File.
 
-	.DESCRIPTION
-		Creates a new Group within your Remote Desktop Connection Manager File for version 2.7.
- which can then be modified.
-	.PARAMETER  FilePath
-		Input the path for the file you wish to Create.
+      .DESCRIPTION
+      Creates a new Group within your Remote Desktop Connection Manager File for version 2.7.
+      which can then be modified.
+      .PARAMETER  FilePath
+      Input the path for the file you wish to Create.
 
-	.PARAMETER  Name
-		Input the name for the Group you wish to create within the file.
+      .PARAMETER  Name
+      Input the name for the Group you wish to create within the file.
 
-	.EXAMPLE
-		PS C:\> New-RDCManGroup -FilePath .\Test.rdg -Name RDCMan
-		'If no output is generated the command was run successfully'
-		This example shows how to call the Name function with named parameters.
+      .EXAMPLE
+      PS C:\> New-RDCManGroup -FilePath .\Test.rdg -Name RDCMan
+      'If no output is generated the command was run successfully'
+      This example shows how to call the Name function with named parameters.
 
 
-	.INPUTS
-		System.String
+      .INPUTS
+      System.String
 
-	.OUTPUTS
-		Null
-#>
+      .OUTPUTS
+      Null
+  #>
   Param(
     [Parameter(Mandatory = $true)]
     [String]$FilePath,
@@ -128,20 +128,20 @@ function New-RDCManGroup
   }
   PROCESS
   {
-      $group = $xml.CreateElement('group')
-      $grouproperties = $xml.CreateElement('properties')
+    $group = $xml.CreateElement('group')
+    $grouproperties = $xml.CreateElement('properties')
       
-      $groupname = $xml.CreateElement('name')
-      $groupname.set_InnerXML($Name)
+    $groupname = $xml.CreateElement('name')
+    $groupname.set_InnerXML($Name)
       
-      $groupexpanded = $xml.CreateElement('expanded')
-      $groupexpanded.set_InnerXML('False')
+    $groupexpanded = $xml.CreateElement('expanded')
+    $groupexpanded.set_InnerXML('False')
       
-      [void]$grouproperties.AppendChild($groupname)
-      [void]$grouproperties.AppendChild($groupexpanded)
+    [void]$grouproperties.AppendChild($groupname)
+    [void]$grouproperties.AppendChild($groupexpanded)
       
-      [void]$group.AppendChild($grouproperties)
-      [void]$xml.RDCMan.file.AppendChild($group)
+    [void]$group.AppendChild($grouproperties)
+    [void]$xml.RDCMan.file.AppendChild($group)
   }
   END
   {
@@ -150,31 +150,36 @@ function New-RDCManGroup
 }
 function New-RDCManServer
 {
-<#
-	.SYNOPSIS
-		Creates a new Remote Desktop Connection Manager File.
+  <#
+      .SYNOPSIS
+      Creates a new Server within a group in your Remote Desktop Connection Manager File.
 
-	.DESCRIPTION
-		Creates a new Remote Desktop Connection Manager File for version .
- which can then be modified.
-	.PARAMETER  FilePath
-		Input the path for the file you wish to append a new group.
+      .DESCRIPTION
+      Creates a new server within the  Remote Desktop Connection Manager File.
 
-	.PARAMETER  Name
-		Input the name for the Structure within the file.
+      .PARAMETER  FilePath
+      Input the path for the file you wish to append a new group.
 
-	.EXAMPLE
-		PS C:\> New-RDCManFile -FilePath .\Test.rdg -Name RDCMan
-		'If no output is generated the command was run successfully'
-		This example shows how to call the Name function with named parameters.
+      .PARAMETER  DisplayName
+      Input the name DisplayName of the server.
+      
+      .PARAMETER  Server
+      Input the FQDN, IP Address or Hostname of the server.
 
+      .PARAMETER  GroupName
+      Input the name DisplayName of the server.
 
-	.INPUTS
-		System.String
+      .EXAMPLE
+      PS C:\> New-RDCManServer -FilePath .\Test.rdg -DisplayName RDCMan -Server '10.10.0.5' -Group Test
+      'If no output is generated the command was run successfully'
+      This example shows how to call the Name function with named parameters.
 
-	.OUTPUTS
-		Null
-#>
+      .INPUTS
+      System.String
+
+      .OUTPUTS
+      Null
+  #>
   Param(
     [Parameter(Mandatory = $true)]
     [String]$FilePath,
@@ -219,7 +224,7 @@ function New-RDCManServer
     [void]$ServerNode.AppendChild($serverproperties)
 
     $group = @($xml.RDCMan.file.group) | Where-Object -FilterScript {
-      $_.properties.name -eq $GroupName
+      $_.properties.name -eq $groupname
     } 
     [void]$group.AppendChild($ServerNode)
   }
@@ -230,31 +235,31 @@ function New-RDCManServer
 }
 function Remove-RDCManServer
 {
-<#
-	.SYNOPSIS
-		Creates a new Remote Desktop Connection Manager File.
+  <#
+      .SYNOPSIS
+      Removes a Server from the Remote Desktop Connection Manager File.
 
-	.DESCRIPTION
-		Creates a new Remote Desktop Connection Manager File for version .
- which can then be modified.
-	.PARAMETER  FilePath
-		Input the path for the file you wish to Create.
+      .DESCRIPTION
+      Removes a Server from the Remote Desktop Connection Manager File.
 
-	.PARAMETER  Name
-		Input the name for the Structure within the file.
+      .PARAMETER  FilePath
+      Input the path for the file you wish to Create.
 
-	.EXAMPLE
-		PS C:\> New-RDCManFile -FilePath .\Test.rdg -Name RDCMan
-		'If no output is generated the command was run successfully'
-		This example shows how to call the Name function with named parameters.
+      .PARAMETER  Name
+      Input the name for the Structure within the file.
+
+      .EXAMPLE
+      PS C:\> Remove-RDCManServer -FilePath .\Test.rdg -DisplayName RDCMan
+      'If no output is generated the command was run successfully'
+      This example shows how to call the Name function with named parameters.
 
 
-	.INPUTS
-		System.String
+      .INPUTS
+      System.String
 
-	.OUTPUTS
-		Null
-#>
+      .OUTPUTS
+      Null
+  #>
   Param(
     [Parameter(Mandatory = $true)]
     [String]$FilePath,
@@ -278,7 +283,13 @@ function Remove-RDCManServer
   }
   PROCESS
   {
-    $xml.RDCMan.file.group.server | Where-Object { $_.properties.displayname -eq $DisplayName } | ForEach-Object  { [void]$xml.RDCMan.file.group.RemoveChild($_) } 
+    $xml.RDCMan.file.group.server |
+    Where-Object -FilterScript {
+      $_.properties.displayname -eq $DisplayName 
+    } |
+    ForEach-Object  -Process {
+      [void]$xml.RDCMan.file.group.RemoveChild($_) 
+    } 
   }
   END
   {
@@ -287,31 +298,32 @@ function Remove-RDCManServer
 }
 function Remove-RDCManGroup
 {
-<#
-	.SYNOPSIS
-		Creates a new Remote Desktop Connection Manager File.
+  <#
+      .SYNOPSIS
+      Removes a Group from the Remote Desktop Connection Manager File.
 
-	.DESCRIPTION
-		Creates a new Remote Desktop Connection Manager File for version .
- which can then be modified.
-	.PARAMETER  FilePath
-		Input the path for the file you wish to Create.
+      .DESCRIPTION
+      Creates a new Remote Desktop Connection Manager File for version .
+      which can then be modified.
 
-	.PARAMETER  Name
-		Input the name for the Structure within the file.
+      .PARAMETER  FilePath
+      Input the path for the file you wish to Create.
 
-	.EXAMPLE
-		PS C:\> New-RDCManFile -FilePath .\Test.rdg -Name RDCMan
-		'If no output is generated the command was run successfully'
-		This example shows how to call the Name function with named parameters.
+      .PARAMETER  Name
+      Input the name for of the group within the file.
+
+      .EXAMPLE
+      PS C:\> Remove-RDCManGroup -FilePath .\Test.rdg -Name RDCMan
+      'If no output is generated the command was run successfully'
+      This example shows how to call the Name function with named parameters.
 
 
-	.INPUTS
-		System.String
+      .INPUTS
+      System.String
 
-	.OUTPUTS
-		Null
-#>
+      .OUTPUTS
+      Null
+  #>
   Param(
     [Parameter(Mandatory = $true)]
     [String]$FilePath,
@@ -335,7 +347,13 @@ function Remove-RDCManGroup
   }
   PROCESS
   {
-    $xml.RDCMan.file.group | Where-Object { $_.properties.name -eq $Name } | ForEach-Object  { [void]$xml.RDCMan.file.RemoveChild($_) } 
+    $xml.RDCMan.file.group |
+    Where-Object -FilterScript {
+      $_.properties.name -eq $Name 
+    } |
+    ForEach-Object  -Process {
+      [void]$xml.RDCMan.file.RemoveChild($_) 
+    } 
   }
   END
   {
