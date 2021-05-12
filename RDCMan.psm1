@@ -191,10 +191,15 @@ function New-RDCManServer
     [String]$Server,
 
     [Parameter(Mandatory = $true)]
-    [String]$DisplayName
+    [String]$DisplayName,
+
+    [Parameter(Mandatory = $false, HelpMessage="Use DOMAIN\USER format, if it's a local account use . to represent the domain")]
+    [pscredential]$Credential
   )
   BEGIN
   {
+    $Binarypath = Join-Path -Path (Get-Module -Name RDCMan).ModuleBase -ChildPath 'bin' -AdditionalChildPath 'RDCMan.dll'
+    Import-Module $Binarypath
     $FilePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($FilePath)
     if(Test-Path -Path $FilePath)
     {
@@ -217,7 +222,41 @@ function New-RDCManServer
     
     $serverdisplayname = $xml.CreateElement('displayName')
     $serverdisplayname.set_InnerXML($DisplayName)
-    
+
+    if($Credential){
+      $logonCredentials = $xml.CreateElement('logonCredentials')
+      $inherit = $xml.CreateAttribute('inherit')
+      $inherit.Value = 'None'
+      [void]$logonCredentials.Attributes.Append($inherit)
+      
+      $profileName = $xml.CreateElement('profileName')
+      $profileName.set_InnerXML('Custom')
+      $scope = $xml.CreateAttribute('scope')
+      $scope.Value = 'Local'
+      [void]$profileName.Attributes.Append($inherit)
+      
+
+      $userName = $xml.CreateElement('userName')
+      $usernamestr = $Credential.UserName.split('\')[1]
+      $userName.set_InnerXML($usernamestr)
+
+      $domain = $xml.CreateElement('domain')
+      $domainstr = $Credential.UserName.split('\')[0]
+      $domain.set_InnerXML($domainstr)
+      
+      $EncryptionSettings = New-Object -TypeName RdcMan.EncryptionSettings
+      $EncryptedPassword = [RdcMan.Encryption]::EncryptString($Credential.GetNetworkCredential().Password, $EncryptionSettings)
+      $password = $xml.CreateElement('password')
+      $password.set_InnerXML($EncryptedPassword)
+      
+      [void]$logonCredentials.AppendChild($profileName)
+      [void]$logonCredentials.AppendChild($userName)
+      [void]$logonCredentials.AppendChild($password)
+      [void]$logonCredentials.AppendChild($domain)
+      
+      [void]$ServerNode.AppendChild($logonCredentials)
+    }
+
     [void]$serverproperties.AppendChild($servername)
     [void]$serverproperties.AppendChild($serverdisplayname)
 
